@@ -12,7 +12,7 @@ class NPC:
 
     # class to track any NPCs that are created
 
-    def __init__(self,name,hp):
+    def __init__(self,name,hp,condition="OK"):
 
         self.name = name
 
@@ -24,7 +24,11 @@ class NPC:
 
         # all NPCs start alive
 
-        self.status = 'Alive'
+        self.hp_status = 'Alive'
+
+        # all NPCs have no health conditions, e.g. blinded
+
+        self.condition="OK"
 
  
 
@@ -54,9 +58,9 @@ class NPC:
 
             self.current_hp = 0
 
-            self.status = 'Dead'
+            self.hp_status = 'Dead'
 
-            return self.status
+            return self.hp_status
 
    
 
@@ -83,6 +87,10 @@ class NPC:
         else:
 
             print(f'{self.name} has been healed to {self.current_hp} HP')
+    
+    def condition_change(self,condition):
+        
+        self.condition = condition
 
  
 
@@ -146,7 +154,15 @@ def print_npc_status(party):
 
     for k, v in party.items():
 
-        print(f'NPC: {party[k].name} - Current HP: {party[k].current_hp}/{party[k].max_hp} - Status: {party[k].status}')
+        # only print condition when status is alive
+
+        if party[k].hp_status == "Alive":
+
+            print(f'NPC: {party[k].name} - Current HP: {party[k].current_hp}/{party[k].max_hp} - HP Status: {party[k].hp_status} - Condition: {party[k].condition}')
+        
+        else: 
+
+            print(f'NPC: {party[k].name} - Current HP: {party[k].current_hp}/{party[k].max_hp} - HP Status: {party[k].hp_status}')
 
     print('\n')
 
@@ -156,7 +172,7 @@ def print_npc_status(party):
 
 def handling_game_mechanics_menu():
 
-    option = input('Choose a mechanic you would like to handle: D - Damage Received; H - Healing Received: ').lower()
+    option = input('Choose a mechanic you would like to handle: D - Damage Received; H - Healing Received; C - Condition Change: ').lower()
 
     return option
 
@@ -182,180 +198,194 @@ def get_target_npc():
 
 # App logic
 
- 
+if __name__ == "__main__":
 
-print('\n')
+    try:
 
-print('\n')
+        print('\n')
 
-print('_______________Welcome to the DnD NPC HP tracker_______________')
+        print('\n')
 
-print('\n')
+        print('_______________Welcome to the DnD NPC HP tracker_______________')
 
-print('\n')
+        print('\n')
 
- 
+        print('\n')
 
-# dictionary and variables to track all NPCs
+        
 
-party = {}
+        # dictionary and variables to track all NPCs
 
-setting_up_party = True
+        party = {}
 
-handling_game_mechanics = True
+        setting_up_party = True
 
-death_count = 0
+        handling_game_mechanics = True
 
- 
+        death_count = 0
 
-while setting_up_party:
+        
 
- 
+        while setting_up_party:
 
-    # get NPC name and HP, and check if more want to be added
+        
 
-    npc_name = get_npc_name()
+            # get NPC name and HP, and check if more want to be added
 
-    if npc_name == 'q':
+            npc_name = get_npc_name()
 
-        break
-
-    else:
-
-        npc_hp = get_npc_hp()    
-
-        # create add NPC to party
-
-        npc = create_npc(npc_name, npc_hp)
-
-        party.update({npc_name: npc}) # nb - to access attributes of object in dict, use party['name'].attr
-
- 
-
-# print NPC's current status
-
-print_npc_status(party)
-
- 
-
-# moving onto handling the game mechanics
-
- 
-
-while handling_game_mechanics:
-
-    # ask user whether they're handling damage dealt or healing received
-
-    option = handling_game_mechanics_menu()  
-
- 
-
-    if option == 'd':
-
-        # get npc to be handled for damage
-
-        target_npc = get_target_npc()                    
-
-       
-
-        # create loop to handle damage input
-
-        while True:
-
-            try:
-
-                target_damage_value = int(input('Enter damage received: '))
-
-                party[target_npc].take_damage(target_damage_value)
-
-                # handle NPC death
-
-                if party[target_npc].status == 'Dead':
-
-                    death_count += 1
-
-                #else:
-
-                    #continue                
-
-                # print NPC's current status
-
-                print_npc_status(party)
-
-               
-
-                # if all NPCs are dead
-
-                if death_count >= len(party):
-
-                    print('All NPCs are dead! Combat over')
-
-                    exit()
-
- 
-
-            except ValueError:
-
-                print('Please enter a valid number for damage received')
-
-            else:
+            if npc_name == 'q':
 
                 break
 
-   
+            else:
 
-    elif option == 'h':
+                npc_hp = get_npc_hp()    
 
-        # get npc to be handled for healing
+                # create add NPC to party
 
-        target_npc = get_target_npc()
+                npc = create_npc(npc_name, npc_hp)
 
-        # create loop to handle healing input
+                party.update({npc_name: npc}) # nb - to access attributes of object in dict, use party['name'].attr
 
-        while True:
+        
 
-            try:
+        # print NPC's current status
 
-                target_healing_value = int(input('Enter healing received: '))
+        print_npc_status(party)
 
-                party[target_npc].heal(target_healing_value)
+        
 
- 
+        # moving onto handling the game mechanics
 
-                # handle healing from dead
+        
 
-                if party[target_npc].status == 'Dead':
+        while handling_game_mechanics:
 
-                    party[target_npc].status = 'Alive'
+            # ask user whether they're handling damage dealt or healing received
 
-                    death_count -= 1
+            option = handling_game_mechanics_menu()  
 
- 
+        
 
-                # print NPC's current status
+            if option == 'd':
+
+                # get npc to be handled for damage
+
+                target_npc = get_target_npc()                    
+
+            
+
+                # create loop to handle damage input
+
+                while True:
+
+                    try:
+
+                        target_damage_value = int(input('Enter damage received: '))
+
+                        party[target_npc].take_damage(target_damage_value)
+
+                        # handle NPC death
+
+                        if party[target_npc].hp_status == 'Dead':
+
+                            death_count += 1
+
+                        #else:
+
+                            #continue                
+
+                        # print NPC's current status
+
+                        print_npc_status(party)
+
+                    
+
+                        # if all NPCs are dead
+
+                        if death_count >= len(party):
+
+                            print('All NPCs are dead! Combat over')
+
+                            exit()
+
+        
+
+                    except ValueError:
+
+                        print('Please enter a valid number for damage received')
+
+                    else:
+
+                        break
+
+        
+
+            elif option == 'h':
+
+                # get npc to be handled for healing
+
+                target_npc = get_target_npc()
+
+                # create loop to handle healing input
+
+                while True:
+
+                    try:
+
+                        target_healing_value = int(input('Enter healing received: '))
+
+                        party[target_npc].heal(target_healing_value)
+
+        
+
+                        # handle healing from dead
+
+                        if party[target_npc].hp_status == 'Dead':
+
+                            party[target_npc].hp_status = 'Alive'
+
+                            death_count -= 1
+
+        
+
+                        # print NPC's current status
+
+                        print_npc_status(party)
+
+        
+
+                    except ValueError:
+
+                        print('Please enter a valid number for healing received')
+
+                    else:
+
+                        break
+            
+            elif option == 'c':
+                
+
+                target_npc = get_target_npc()
+
+                # get and set condition           
+
+                target_condition = input('Enter condition: ')
+
+                party[target_npc].condition = target_condition
 
                 print_npc_status(party)
 
- 
+        
 
-            except ValueError:
-
-                print('Please enter a valid number for healing received')
+            # if option isn't d/h/c, repeat the menu
 
             else:
 
-                break
+                # repeat the loop
 
-   
-
-    # if option isn't d or h, repeat the menu
-
-    else:
-
-        # repeat the loop
-
-        continue
-
-       
-
- 
+                continue
+    
+    except KeyboardInterrupt:
+        print("\nClosing...")
